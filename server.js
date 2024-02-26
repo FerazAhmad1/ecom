@@ -15,7 +15,7 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then((connection) => console.log(connection))
+  .then((connection) => connection)
   .catch((err) => console.log(err.message));
 const port = process.env.PORT || 3000;
 app.listen(port, () => {

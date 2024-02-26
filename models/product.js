@@ -3,15 +3,15 @@ const mongoose = require("mongoose");
 const productSchema = new mongoose.Schema({
   productName: {
     type: String,
-    required: true,
+    required: [true, "please provide product Name"],
   },
   brandName: {
     type: String,
-    required: true,
+    required: [true, "please provide brand Name"],
   },
   categoryName: {
     type: String,
-    required: true,
+    required: [true, "please provide category Name"],
   },
   attribute1: String,
   attribute2: String,
@@ -27,13 +27,16 @@ const productSchema = new mongoose.Schema({
   SKU: {
     type: String,
     required: true,
-    unique: true,
     index: true,
   },
-  image: String,
+  image: {
+    type: String,
+    unique: true,
+    required: true,
+  },
   listPrice: {
     type: Number,
-    required: true,
+    required: [true, "A product must have listPrice"],
   },
 });
 
