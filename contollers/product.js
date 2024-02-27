@@ -95,20 +95,12 @@ exports.createProduct = async (req, res) => {
 };
 
 exports.searchbyIndex = async (req, res) => {
-  const { SKU, quantity, discount } = req.query;
-  let factor = 1 - discount / 100;
-  const pipeline = [
-    {
-      $search: {
-        index: "SKU", // specify the name of your Atlas Search index
-        text: {
-          query: SKU,
-          path: "SKU", // specify the field to search within
-        },
-      },
-    },
-    {
-      $project: {
+  try {
+    const { SKU, quantity, discount } = req.query;
+    let factor = 1 - discount / 100;
+    const products = await productModel.find(
+      { SKU },
+      {
         productName: 1,
         brandName: 1,
         SKU: 1,
@@ -125,11 +117,23 @@ exports.searchbyIndex = async (req, res) => {
             quantity * 1,
           ],
         },
+      }
+    );
+
+    if (products.length === 0) {
+      throw new Error("Product not found.");
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        products,
       },
-    },
-  ];
-
-  const products = await productModel.aggregate(pipeline);
-
-  console.log(products);
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: "fail",
+      message: error.message,
+    });
+  }
 };

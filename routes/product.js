@@ -6,6 +6,6 @@ const {
 } = require("../contollers/product.js");
 const router = express.Router();
 
-router.route("/").get(getProduct).post(createProduct);
+router.route("/").get(searchbyIndex).post(createProduct);
 
 module.exports = router;

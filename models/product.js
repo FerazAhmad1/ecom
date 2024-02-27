@@ -28,7 +28,6 @@ const productSchema = new mongoose.Schema({
   SKU: {
     type: String,
     required: true,
-    index: true,
   },
   image: {
     type: String,
@@ -40,7 +39,7 @@ const productSchema = new mongoose.Schema({
     required: [true, "A product must have listPrice"],
   },
 });
-
+productSchema.index({ SKU: 1 });
 const Product = mongoose.model("Product", productSchema);
 
 module.exports = Product;
