@@ -95,6 +95,7 @@ exports.createProduct = async (req, res) => {
 };
 
 exports.searchbyIndex = async (req, res) => {
+  console.log("search by index");
   try {
     const { SKU, quantity, discount } = req.query;
     let factor = 1 - discount / 100;
