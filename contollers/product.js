@@ -3,7 +3,7 @@ const productModel = require("../models/product.js");
 exports.getProduct = async (req, res) => {
   try {
     const { SKU, quantity, discount } = req.query;
-
+    let factor = 1 - discount / 100;
     console.log(SKU, quantity, discount);
 
     const products = await productModel.aggregate([
@@ -20,18 +20,12 @@ exports.getProduct = async (req, res) => {
           listPrice: 1,
           GST: 1,
           offerPrice: {
-            $multiply: [
-              "$listPrice",
-              { $subtract: [1, { $divide: [discount * 1, 100] }] },
-            ],
+            $multiply: ["$listPrice", factor],
           },
           amount: {
             $multiply: [
               {
-                $multiply: [
-                  "$listPrice",
-                  { $subtract: [1, { $divide: [discount * 1, 100] }] },
-                ],
+                $multiply: ["$listPrice", factor],
               },
               quantity * 1,
             ],
@@ -87,12 +81,55 @@ exports.createProduct = async (req, res) => {
       image,
       listPrice,
     });
-    res.send("success");
-    console.log(response);
+    res.status(201).json({
+      data: {
+        product: response,
+      },
+    });
   } catch (error) {
     res.status(400).json({
       status: "fail",
       message: error.message,
     });
   }
+};
+
+exports.searchbyIndex = async (req, res) => {
+  const { SKU, quantity, discount } = req.query;
+  let factor = 1 - discount / 100;
+  const pipeline = [
+    {
+      $search: {
+        index: "SKU", // specify the name of your Atlas Search index
+        text: {
+          query: SKU,
+          path: "SKU", // specify the field to search within
+        },
+      },
+    },
+    {
+      $project: {
+        productName: 1,
+        brandName: 1,
+        SKU: 1,
+        listPrice: 1,
+        GST: 1,
+        offerPrice: {
+          $multiply: ["$listPrice", factor],
+        },
+        amount: {
+          $multiply: [
+            {
+              $multiply: ["$listPrice", factor],
+            },
+            quantity * 1,
+          ],
+        },
+      },
+    },
+  ];
+
+  const products = await productModel.aggregate(pipeline);
+
+  console.log(products);
 };
